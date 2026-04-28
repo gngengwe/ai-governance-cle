@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Governance for Legal Departments — ACC Colorado CLE 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0d1b2a;
+      --navy-mid:   #152337;
+      --navy-card:  #1a2d45;
+      --navy-light: #243b55;
+      --blue:       #4a9eff;
+      --teal:       #00c9a7;
+      --white:      #f1f5f9;
+      --gray:       #7d9ab5;
+      --lgray:      #c4d4e4;
+      --red:        #ff6b6b;
+      --gold:       #ffd166;
+      --slide-w:    1200px;
+      --slide-h:    675px;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #060d18;
+      font-family: -apple-system, 'Segoe UI', system-ui, Helvetica, sans-serif;
+      overflow: hidden;
+      color: var(--white);
+    }
+
+    /* ── Layout ── */
+    #app {
+      width: 100vw; height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 14px;
+    }
+
+    #slide-container {
+      display: flex; align-items: center; justify-content: center;
+      width: 100%; flex: 1; overflow: hidden; padding: 12px 12px 0;
+    }
+
+    #slide-scaler {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      transform-origin: center center;
+      flex-shrink: 0;
+    }
+
+    #slide-viewport {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      position: relative;
+      overflow: hidden;
+      border-radius: 6px;
+      box-shadow: 0 24px 72px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04);
+    }
+
+    /* ── Slide base ── */
+    .slide {
+      position: absolute; inset: 0;
+      background: var(--navy);
+      background-image:
+        radial-gradient(ellipse at 15% 85%, rgba(0,201,167,0.045) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 15%, rgba(74,158,255,0.055) 0%, transparent 55%);
+      padding: 52px 60px 44px;
+      display: flex; flex-direction: column;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .slide.active { opacity: 1; pointer-events: all; }
+
+    /* top accent bar */
+    .slide::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--teal) 0%, var(--blue) 100%);
+    }
+
+    /* slide meta: number + speaker badge */
+    .s-meta {
+      position: absolute; top: 14px; right: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .s-num { font-size: 11px; color: var(--gray); letter-spacing: 0.06em; }
+    .s-badge {
+      background: rgba(74,158,255,0.12);
+      border: 1px solid rgba(74,158,255,0.35);
+      color: var(--blue);
+      padding: 3px 11px; border-radius: 20px;
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.06em; text-transform: uppercase;
+    }
+    .s-badge.teal {
+      background: rgba(0,201,167,0.12);
+      border-color: rgba(0,201,167,0.35);
+      color: var(--teal);
+    }
+    .s-badge.multi {
+      background: rgba(100,100,255,0.1);
+      border-color: rgba(150,150,255,0.3);
+      color: #a0b4ff;
+    }
+
+    /* ── Standard slide header ── */
+    .s-head { margin-bottom: 26px; flex-shrink: 0; }
+    .s-section {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
+      color: var(--teal); margin-bottom: 7px;
+    }
+    .s-title {
+      font-size: 33px; font-weight: 800; line-height: 1.18;
+      color: var(--white);
+    }
+    .s-title em { color: var(--blue); font-style: normal; }
+    .s-rule {
+      width: 44px; height: 3px; border-radius: 2px; margin-top: 11px;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+    }
+
+    /* ── Bullets ── */
+    .bullets {
+      flex: 1; list-style: none;
+      display: flex; flex-direction: column; justify-content: center;
+      gap: 15px;
+    }
+    .bullets li {
+      display: flex; align-items: flex-start; gap: 14px;
+      font-size: 17.5px; line-height: 1.5; color: var(--lgray);
+    }
+    .bullets li::before {
+      content: '';
+      flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--teal); margin-top: 8px;
+    }
+    .bullets li strong { color: var(--white); font-weight: 700; }
+    .bullets li .hl  { color: var(--teal); }
+    .bullets li .hlb { color: var(--blue); }
+
+    /* ── Two-column ── */
+    .two-col {
+      flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+      gap: 20px; align-content: start;
+    }
+    .col-card {
+      background: var(--navy-mid);
+      border-radius: 8px; padding: 22px 22px 20px;
+      border-top: 3px solid var(--blue);
+    }
+    .col-card.t { border-top-color: var(--teal); }
+    .col-card.r { border-top-color: var(--red); }
+    .col-card h3 {
+      font-size: 13px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.09em;
+      color: var(--white); margin-bottom: 14px;
+    }
+    .col-card ul { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+    .col-card ul li {
+      font-size: 14.5px; color: var(--lgray);
+      padding-left: 15px; position: relative; line-height: 1.45;
+    }
+    .col-card ul li::before {
+      content: '›';
+      position: absolute; left: 0;
+      color: var(--teal); font-weight: 700; font-size: 16px;
+    }
+
+    /* pill tags */
+    .pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .pill {
+      background: rgba(74,158,255,0.1);
+      border: 1px solid rgba(74,158,255,0.28);
+      color: var(--lgray);
+      padding: 4px 13px; border-radius: 20px; font-size: 12.5px;
+    }
+
+    /* ── Title slide ── */
+    .slide.title { padding: 56px 72px; justify-content: center; align-items: flex-start; }
+    .t-event {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--teal); margin-bottom: 22px;
+    }
+    .t-main {
+      font-size: 48px; font-weight: 900; line-height: 1.08;
+      max-width: 680px; margin-bottom: 14px;
+      background: linear-gradient(135deg, #f1f5f9 30%, #8cbfff 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .t-sub {
+      font-size: 19px; color: var(--teal);
+      font-weight: 400; margin-bottom: 48px;
+    }
+    .speaker-row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .spk-card {
+      background: var(--navy-mid);
+      border: 1px solid var(--navy-light);
+      border-top: 2px solid var(--teal);
+      padding: 15px 24px; border-radius: 7px; min-width: 170px;
+    }
+    .spk-name { font-size: 15px; font-weight: 700; color: var(--white); }
+    .spk-role { font-size: 11.5px; color: var(--gray); margin-top: 3px; }
+    .t-foot {
+      position: absolute; bottom: 36px; left: 72px;
+      font-size: 12.5px; color: var(--gray); letter-spacing: 0.03em;
+    }
+
+    /* ── Human-in-loop diagram ── */
+    .loop-wrap {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 0;
+    }
+    .l-node {
+      background: var(--navy-mid);
+      border: 2px solid var(--blue);
+      border-radius: 8px; padding: 18px 18px 15px;
+      text-align: center; min-width: 138px;
+    }
+    .l-node.h { border-color: var(--teal); }
+    .l-node .ico { font-size: 26px; margin-bottom: 6px; }
+    .l-node .lbl { font-size: 13.5px; font-weight: 700; color: var(--white); }
+    .l-node .sub { font-size: 11px; color: var(--gray); margin-top: 4px; line-height: 1.3; }
+    .l-arr {
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+      padding: 0 6px;
+    }
+    .arr-line {
+      width: 52px; height: 2px; background: var(--blue); position: relative;
+    }
+    .arr-line::after {
+      content: '▶';
+      position: absolute; right: -8px; top: -7px;
+      color: var(--blue); font-size: 11px;
+    }
+    .arr-lbl { font-size: 10px; color: var(--gray); white-space: nowrap; }
+    .loop-bullets { list-style: none; margin-top: 18px; gap: 8px; display: flex; flex-direction: column; }
+    .loop-bullets li {
+      display: flex; align-items: flex-start; gap: 12px;
+      font-size: 15.5px; line-height: 1.45; color: var(--lgray);
+    }
+    .loop-bullets li::before {
+      content: '';
+      flex-shrink: 0; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--teal); margin-top: 7px;
+    }
+    .loop-bullets li strong { color: var(--white); }
+
+    /* ── L.E.G.A.L. grid ── */
+    .legal-grid {
+      flex: 1; display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 14px; align-items: stretch;
+    }
+    .leg-item {
+      background: var(--navy-mid);
+      border-radius: 8px; padding: 24px 12px 20px;
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; border-bottom: 3px solid var(--teal);
+    }
+    .leg-letter {
+      font-size: 46px; font-weight: 900; line-height: 1;
+      background: linear-gradient(135deg, var(--teal) 0%, var(--blue) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 9px;
+    }
+    .leg-word {
+      font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--white); margin-bottom: 9px;
+    }
+    .leg-desc { font-size: 12px; color: var(--gray); line-height: 1.45; }
+
+    /* ── Framework layers ── */
+    .layers {
+      flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 10px;
+    }
+    .layer {
+      border-radius: 6px; padding: 15px 24px;
+      display: flex; align-items: center; gap: 20px;
+    }
+    .ly1 { background: rgba(0,201,167,0.12); border-left: 4px solid var(--teal); }
+    .ly2 { background: rgba(74,158,255,0.10); border-left: 4px solid var(--blue); }
+    .ly3 { background: rgba(74,158,255,0.07); border-left: 4px solid #6aabff; }
+    .ly4 { background: rgba(148,163,184,0.07); border-left: 4px solid var(--gray); }
+    .ly-label {
+      font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--white); min-width: 140px;
+    }
+    .ly-desc { font-size: 14px; color: var(--lgray); line-height: 1.4; }
+
+    /* ── Risk quadrants ── */
+    .risk-grid {
+      flex: 1; display: grid; grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr 1fr; gap: 12px;
+    }
+    .rq {
+      background: var(--navy-mid); border-radius: 8px; padding: 18px 20px;
+      border-top: 3px solid var(--blue);
+    }
+    .rq:nth-child(1) { border-top-color: var(--red); }
+    .rq:nth-child(2) { border-top-color: var(--blue); }
+    .rq:nth-child(3) { border-top-color: var(--teal); }
+    .rq:nth-child(4) { border-top-color: var(--gold); }
+    .rq h4 {
+      font-size: 12.5px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; color: var(--white); margin-bottom: 10px;
+    }
+    .rq ul { list-style: none; }
+    .rq ul li {
+      font-size: 13px; color: var(--lgray);
+      padding: 4px 0 4px 14px; position: relative; line-height: 1.35;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .rq ul li:last-child { border-bottom: none; }
+    .rq ul li::before {
+      content: '—'; position: absolute; left: 0;
+      color: var(--gray); font-size: 11px;
+    }
+
+    /* ── Checklist ── */
+    .checklist {
+      flex: 1; display: flex; flex-direction: column;
+      justify-content: center; gap: 11px;
+    }
+    .chk {
+      display: flex; align-items: center; gap: 16px;
+      background: var(--navy-mid); border-radius: 6px;
+      padding: 12px 20px; border-left: 3px solid var(--teal);
+    }
+    .chk-box {
+      width: 22px; height: 22px; border: 2px solid var(--teal);
+      border-radius: 4px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; color: var(--teal); font-weight: 900;
+    }
+    .chk-text { font-size: 15.5px; color: var(--lgray); line-height: 1.35; }
+    .chk-text strong { color: var(--white); }
+
+    /* ── Notes panel ── */
+    #notes-wrap {
+      width: 100%; max-width: var(--slide-w);
+      padding: 0 12px;
+    }
+    #notes-panel {
+      background: #0a1422;
+      border: 1px solid #1a2d45;
+      border-radius: 6px;
+      padding: 0 20px;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.3s ease, padding 0.3s ease;
+    }
+    #notes-panel.open { max-height: 160px; padding: 12px 20px; overflow-y: auto; }
+    #notes-panel h4 {
+      font-size: 10.5px; text-transform: uppercase;
+      letter-spacing: 0.14em; color: var(--teal); margin-bottom: 7px;
+    }
+    #notes-text { font-size: 13px; color: var(--gray); line-height: 1.65; }
+
+    /* ── Controls bar ── */
+    #controls {
+      display: flex; align-items: center; gap: 12px;
+      padding: 0 12px 14px;
+      width: 100%; max-width: calc(var(--slide-w) + 24px);
+    }
+    .c-btn {
+      background: var(--navy-mid); border: 1px solid var(--navy-light);
+      color: var(--lgray); padding: 7px 18px; border-radius: 6px;
+      cursor: pointer; font-size: 12.5px; transition: all 0.18s;
+      white-space: nowrap; letter-spacing: 0.02em;
+    }
+    .c-btn:hover { background: var(--navy-light); border-color: var(--blue); color: var(--white); }
+    .c-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .c-btn.on { border-color: var(--teal); color: var(--teal); }
+    #progress {
+      flex: 1; height: 3px; background: var(--navy-card); border-radius: 2px; overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%; width: 4.5%;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      border-radius: 2px; transition: width 0.3s ease;
+    }
+    #counter { font-size: 12px; color: var(--gray); min-width: 52px; text-align: center; }
+
+    /* ── Misc helpers ── */
+    .case-callout {
+      background: rgba(255,107,107,0.1);
+      border: 1px solid rgba(255,107,107,0.3);
+      border-left: 3px solid var(--red);
+      border-radius: 6px; padding: 11px 18px; margin-top: 14px;
+      font-size: 13.5px; color: var(--lgray);
+    }
+    .case-callout strong { color: var(--red); }
+
+    .stat-row { display: flex; gap: 14px; margin-top: 16px; }
+    .stat-box {
+      background: var(--navy-mid); border-radius: 7px;
+      padding: 14px 18px; border-top: 2px solid var(--blue);
+      flex: 1; text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 800; color: var(--blue); }
+    .stat-lbl { font-size: 11.5px; color: var(--gray); margin-top: 3px; }
+
+    #hint { position: fixed; bottom: 8px; right: 12px; font-size: 10.5px; color: #1e3555; }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="slide-container">
+    <div id="slide-scaler">
+      <div id="slide-viewport">
+
+
+        <!-- ═══════════════════════════════════════════════
+             01 — TITLE
+        ════════════════════════════════════════════════ -->
+        <div class="slide title active"
+          data-notes="Welcome the audience to this ACC Colorado CLE. Introduce yourself — George Ngengwe — and your co-presenters Camila Tobón and Lindsey Schultz. Frame the session: AI is no longer a future concern — it is a present governance challenge for every in-house legal department. Acknowledge the rapid pace of regulatory change, including Colorado's AI Act effective February 2026, and set expectations that this session will be practical and immediately actionable. No sales pitches — just usable frameworks and a governance checklist they can take back to the office today.">
+          <div class="t-event">ACC Colorado &nbsp;·&nbsp; CLE Presentation &nbsp;·&nbsp; 2026</div>
+          <div class="t-main">AI Governance for Legal Departments</div>
+          <div class="t-sub">Managing Risk, Ethics, and Emerging Regulation</div>
+          <div class="speaker-row">
+            <div class="spk-card">
+              <div class="spk-name">Lindsey Schultz</div>
+              <div class="spk-role">Speaker</div>
+            </div>
+            <div class="spk-card">
+              <div class="spk-name">Camila Tobón</div>
+              <div class="spk-role">Speaker</div>
+            </div>
+            <div class="spk-card">
+              <div class="spk-name">George Ngengwe</div>
+              <div class="spk-role">Speaker</div>
+            </div>
+          </div>
+          <div class="t-foot">1.0 CLE Credit &nbsp;·&nbsp; ACC Colorado &nbsp;·&nbsp; 2026</div>
+          <div class="s-meta">
+            <span class="s-num">01 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             02 — FROM AI USE TO AI GOVERNANCE
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Set the stage: most companies have already crossed the line from 'evaluating AI' to 'using AI.' The governance infrastructure hasn't caught up. Explain that the shift from use to governance means moving from ad hoc decisions to structured policy — who can use what tools, for what purposes, with what oversight. Use the analogy: we govern data, we govern outside counsel, we govern spending — AI needs the same infrastructure. The legal department is uniquely positioned to lead that effort, and has professional obligations that require it to engage.">
+          <div class="s-head">
+            <div class="s-section">Context</div>
+            <div class="s-title">From AI Use to <em>AI Governance</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Most organizations have already crossed into production AI use</strong> — evaluation is over; deployment is happening</li>
+            <li><strong>Use without governance</strong> creates legal, ethical, and regulatory exposure across the enterprise</li>
+            <li><strong>Governance means policy + oversight + accountability</strong> — it is not a ban on tools or a slowdown mandate</li>
+            <li><strong>Legal departments must lead or risk being last to know</strong> about enterprise AI risk that lands on their desk</li>
+            <li><strong>The window to get ahead of this is narrowing</strong> — regulators, courts, and bar associations are all moving</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">02 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             03 — WHY LEGAL DEPARTMENTS ARE NOW RISK OWNERS
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Legal departments are uniquely positioned — and uniquely obligated — to own AI governance. Walk through each bullet: attorneys face ethics obligations that attach to their tool use; vendor contracts land on legal's desk; IP questions about AI output are legal questions; regulatory exposure from AI deployments flows through compliance and legal. Close with: this is not just IT's problem. Legal owns a significant portion of the risk surface and needs a seat at the governance table from day one, not after the incident.">
+          <div class="s-head">
+            <div class="s-section">Responsibility</div>
+            <div class="s-title">Why Legal Departments Are <em>Now Risk Owners</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Attorneys face direct professional ethics obligations</strong> that attach to how they use AI tools — no opt-out</li>
+            <li><strong>Vendor and procurement contracts involving AI</strong> route through legal review and carry new risk terms</li>
+            <li><strong>IP ownership of AI-generated work product</strong> is an unsettled legal question that legal must guide</li>
+            <li><strong>Regulatory exposure from enterprise AI deployments</strong> runs through compliance and the general counsel's office</li>
+            <li><strong>Litigation readiness requires governance documentation</strong> — before incidents occur, not in response to them</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">03 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             04 — WHERE AI SHOWS UP IN LEGAL WORK
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Ground the audience in reality. Many in-house attorneys are already using AI — some knowingly, some without realizing the tool they use has AI embedded in it. Walk through each use case with a brief example. Invite the audience to mentally check which of these their department already does. The point: AI in legal work is not hypothetical, it spans the full range of legal activities, and it often shows up in the business before legal is informed. The enterprise-wide column is especially important — legal is responsible for AI deployed in HR, finance, and customer-facing functions even if it didn't deploy those tools itself.">
+          <div class="s-head">
+            <div class="s-section">Landscape</div>
+            <div class="s-title">Where AI <em>Shows Up</em> in Legal Work</div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="two-col">
+            <div class="col-card t">
+              <h3>Core Legal Tasks</h3>
+              <ul>
+                <li>Contract drafting, review, and AI-assisted redlining</li>
+                <li>Legal research and case law summarization</li>
+                <li>Regulatory monitoring, alerts, and gap analysis</li>
+                <li>Document review and e-discovery processing</li>
+                <li>Due diligence and M&amp;A document analysis</li>
+              </ul>
+            </div>
+            <div class="col-card">
+              <h3>Enterprise-Wide Exposure</h3>
+              <ul>
+                <li>HR: performance scoring, hiring decision tools</li>
+                <li>Finance: fraud detection, credit risk models</li>
+                <li>Customer-facing: chatbots, automated decisions</li>
+                <li>Operations: procurement, supply chain AI</li>
+                <li>Marketing: AI content generation and targeting</li>
+              </ul>
+            </div>
+          </div>
+          <div class="pills">
+            <span class="pill">Board Materials</span>
+            <span class="pill">Compliance Reporting</span>
+            <span class="pill">Litigation Strategy</span>
+            <span class="pill">Regulatory Filings</span>
+            <span class="pill">IP Clearance</span>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">04 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             05 — HUMAN-IN-THE-LOOP
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="This is a foundational concept for the entire presentation. The human-in-the-loop model means that AI augments attorney work — it does not replace attorney judgment. Stress: accountability cannot be delegated to the model. If an AI-generated brief contains a hallucinated citation and the attorney files it without verification, the attorney is responsible. Walk through the diagram left to right: the attorney defines the task and prompt context; AI generates a draft output; the attorney reviews, edits, and decides; only then does authorized action occur. The attorney's signature on the action is what makes every node in the loop a professional responsibility moment.">
+          <div class="s-head">
+            <div class="s-section">Framework</div>
+            <div class="s-title">The <em>Human-in-the-Loop</em> Model</div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="loop-wrap">
+            <div class="l-node h">
+              <div class="ico">⚖️</div>
+              <div class="lbl">Attorney</div>
+              <div class="sub">Defines task &amp; prompt context</div>
+            </div>
+            <div class="l-arr">
+              <div class="arr-line"></div>
+              <div class="arr-lbl">Prompt / Input</div>
+            </div>
+            <div class="l-node">
+              <div class="ico">🤖</div>
+              <div class="lbl">AI Tool</div>
+              <div class="sub">Generates draft output</div>
+            </div>
+            <div class="l-arr">
+              <div class="arr-line"></div>
+              <div class="arr-lbl">Draft Output</div>
+            </div>
+            <div class="l-node h">
+              <div class="ico">🔍</div>
+              <div class="lbl">Review</div>
+              <div class="sub">Verify, edit &amp; decide</div>
+            </div>
+            <div class="l-arr">
+              <div class="arr-line"></div>
+              <div class="arr-lbl">Authorized Use</div>
+            </div>
+            <div class="l-node h">
+              <div class="ico">✅</div>
+              <div class="lbl">Action</div>
+              <div class="sub">Attorney accountable</div>
+            </div>
+          </div>
+          <ul class="loop-bullets">
+            <li><strong>AI is a tool</strong> — the attorney is the decision-maker and the accountable party at every step</li>
+            <li><strong>Accountability cannot be delegated to the model</strong> — supervision obligations attach throughout the loop</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">05 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             06 — WHERE AI WORKS / WHERE IT FAILS
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="This slide sets realistic expectations about AI capability. Legal professionals tend to either over-trust or under-trust AI tools — neither posture is safe. Walk through each 'works' item with a brief example of appropriate use, then contrast with the 'fails' column. Emphasize: hallucinations are not a bug that will eventually be patched — they are a structural feature of probabilistic language models. High-stakes decisions and court filings always require independent attorney verification regardless of how confident the AI output appears. The AI doesn't know what it doesn't know.">
+          <div class="s-head">
+            <div class="s-section">Capability Assessment</div>
+            <div class="s-title">Where AI <em>Works</em> — and Where It <em>Fails</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="two-col">
+            <div class="col-card t">
+              <h3>✓ &nbsp;AI Adds Genuine Value</h3>
+              <ul>
+                <li>Pattern recognition across large document sets</li>
+                <li>Summarization and first-draft generation</li>
+                <li>Routine contract clause identification</li>
+                <li>Research starting points and issue spotting</li>
+                <li>Workflow automation for high-volume repetitive tasks</li>
+              </ul>
+            </div>
+            <div class="col-card r">
+              <h3>✗ &nbsp;AI Introduces Serious Risk</h3>
+              <ul>
+                <li>Novel legal questions requiring nuanced judgment</li>
+                <li>Real-time or jurisdiction-specific law updates</li>
+                <li>Client counseling and strategic decision-making</li>
+                <li>Hallucinated citations — structural, not a fixable bug</li>
+                <li>High-stakes outputs without independent attorney review</li>
+              </ul>
+            </div>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">06 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             07 — L.E.G.A.L. PROMPT FRAMEWORK
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="The L.E.G.A.L. framework gives attorneys a practical tool they can use today — in their next AI interaction. Walk through each letter with a concrete example. Limit: keep prompts scoped — don't paste an entire contract when you only need one clause analyzed. Exclude: never paste client names, deal terms, or privileged content into public-facing AI tools. Guide: context-rich prompts produce better outputs and reduce hallucination risk — tell the model what jurisdiction and standard applies. Audit: treat AI output exactly as you would a draft from a junior associate — it requires review. Log: documentation of AI use supports supervision obligations and creates an audit trail if the work product is later challenged.">
+          <div class="s-head">
+            <div class="s-section">Practical Tool</div>
+            <div class="s-title">The <em>L.E.G.A.L.</em> Prompt Framework</div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="legal-grid">
+            <div class="leg-item">
+              <div class="leg-letter">L</div>
+              <div class="leg-word">Limit</div>
+              <div class="leg-desc">Scope the prompt — avoid over-sharing unnecessary context</div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-letter">E</div>
+              <div class="leg-word">Exclude</div>
+              <div class="leg-desc">Keep confidential and privileged data out of third-party tools</div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-letter">G</div>
+              <div class="leg-word">Guide</div>
+              <div class="leg-desc">Provide jurisdiction and legal context to reduce hallucinations</div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-letter">A</div>
+              <div class="leg-word">Audit</div>
+              <div class="leg-desc">Review every output before use — treat it as a draft, not a final</div>
+            </div>
+            <div class="leg-item">
+              <div class="leg-letter">L</div>
+              <div class="leg-word">Log</div>
+              <div class="leg-desc">Document AI-assisted work to support your supervision trail</div>
+            </div>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">07 / 22</span>
+            <span class="s-badge">George Ngengwe</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             08 — EXISTING ETHICAL DUTIES STILL APPLY
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Camila takes over. Transition with: George has set the practical and operational frame — now let's talk about the ethics obligations that make governance not just good practice, but a professional requirement. Emphasize: the Model Rules were written for attorneys, not for tools. The tool doesn't have ethics obligations — the attorney does. There is no 'I used AI' defense to a rules violation. The Colorado Rules of Professional Conduct apply in full to every work product generated with AI assistance. Use the phrase: technology is neutral; your professional obligations are not. Reference ABA Formal Opinion 512 (2024) which directly addressed attorney use of generative AI.">
+          <div class="s-head">
+            <div class="s-section">Legal Ethics — Section Overview</div>
+            <div class="s-title">Existing Ethical Duties <em>Still Apply</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>The Model Rules apply regardless of the tool used</strong> — there is no ethics carve-out for AI-generated content</li>
+            <li><strong>Colorado Rules of Professional Conduct</strong> govern in-house counsel using AI on legal matters without exception</li>
+            <li><strong>Technology is neutral — your professional obligations are not</strong> — the duty attaches to the attorney, not the tool</li>
+            <li><strong>No "the AI did it" defense</strong> — the attorney of record owns the work product and its consequences</li>
+            <li><strong>ABA Formal Opinion 512 (2024)</strong> directly addresses generative AI — confirms technology-neutral ethics duties</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">08 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             09 — COMPETENCE AND SUPERVISION
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Rule 1.1 has been interpreted by the ABA and multiple state bars to include technological competence — Comment 8 specifically. For AI, this means understanding what the tool can and cannot do, how it generates outputs, and where verification is required. You don't need to be a computer scientist, but you do need to understand that AI generates probabilistic outputs, not authoritative answers. Supervision obligations under Rules 5.1 and 5.3 apply to AI just as they apply to associates and non-lawyer staff — you are responsible for reviewing, approving, and standing behind work produced under your supervision, regardless of whether that work was assisted by a human or a machine.">
+          <div class="s-head">
+            <div class="s-section">Rules 1.1 · 5.1 · 5.3</div>
+            <div class="s-title"><em>Competence</em> and Supervision</div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Rule 1.1 (Competence)</strong> includes keeping current with technology relevant to your practice — Comment 8</li>
+            <li><strong>You must understand</strong> the AI tool's capabilities, limitations, and failure modes before relying on its outputs</li>
+            <li><strong>Rules 5.1 and 5.3</strong> — supervisory obligations extend fully to AI-generated work product; you own the output</li>
+            <li><strong>Ongoing education is required</strong> — a one-time CLE does not satisfy the continuing duty of technological competence</li>
+            <li><strong>Delegating to AI without oversight</strong> is the functional equivalent of delegating to an unsupervised associate</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">09 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             10 — CONFIDENTIALITY, PRIVILEGE, AND DATA
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="This is one of the highest-risk areas for in-house counsel. Rule 1.6 requires reasonable measures to protect confidential client information. Inputting privileged or confidential information into a public AI tool — where it may be used for model training — is a potential Rule 1.6 violation. Walk through the privilege question: does attorney-client privilege attach when a third party (the AI vendor) processes the communication? Answer: it depends on the jurisdiction and the tool's terms of service — which is itself a risk. Practical takeaway: use enterprise-grade tools with executed data processing agreements, zero training-data opt-in, and explicit confidentiality obligations in the vendor contract. Never input client-identifying information into free or consumer AI tools.">
+          <div class="s-head">
+            <div class="s-section">Rule 1.6</div>
+            <div class="s-title">Confidentiality, <em>Privilege</em>, and Data Handling</div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Rule 1.6 requires reasonable measures</strong> to protect confidential client information — including AI inputs</li>
+            <li><strong>Inputting client data into public AI tools</strong> may constitute an unauthorized disclosure under Rule 1.6</li>
+            <li><strong>Attorney-client privilege may not extend</strong> to AI-processed communications — jurisdictionally unsettled</li>
+            <li><strong>Vendor data retention, training data use, and deletion policies</strong> are directly material to your ethics compliance</li>
+            <li><strong>Use enterprise-grade tools</strong> with executed data processing agreements that explicitly prohibit training-data use</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">10 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             11 — CANDOR, VERIFICATION, HALLUCINATIONS
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Cite Mata v. Avianca (SDNY 2023) as the most prominent real-world example. Attorneys submitted ChatGPT-generated briefs containing entirely fabricated case citations — cases that did not exist. The court imposed sanctions on both the filing attorneys and the supervising partner. Rule 3.3 duty of candor to the tribunal means filing hallucinated citations is not just embarrassing — it is a rules violation that can result in sanctions, bar discipline, and reputational damage. Emphasize: independent verification is non-negotiable before any AI-generated citation goes to a court, regulator, or counterparty. If you can't find it on Westlaw or Lexis, it doesn't go in the filing.">
+          <div class="s-head">
+            <div class="s-section">Rule 3.3</div>
+            <div class="s-title">Candor, Verification, and <em>Hallucinations</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Rule 3.3 (Candor to the Tribunal)</strong> applies in full to AI-generated filings, citations, and representations</li>
+            <li><strong>Hallucinations are structural</strong> — AI models generate plausible-sounding but fabricated content as a design characteristic</li>
+            <li><strong>Every AI-generated citation must be independently verified</strong> in Westlaw, Lexis, or primary source before filing</li>
+            <li><strong>"The AI generated it"</strong> is not a defense — the signing attorney bears full professional responsibility for filed content</li>
+          </ul>
+          <div class="case-callout">
+            <strong>Mata v. Avianca, Inc. (SDNY 2023)</strong> — Court imposed sanctions on attorneys who filed ChatGPT-generated briefs containing entirely fabricated case citations. The supervising partner was sanctioned alongside the filing attorney.
+          </div>
+          <div class="s-meta">
+            <span class="s-num">11 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             12 — COLORADO AI ACT
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Colorado's SB 24-205, the Colorado Artificial Intelligence Act, is one of the first comprehensive state AI laws in the U.S., effective February 1, 2026. It focuses on 'high-risk AI systems' that make or substantially influence 'consequential decisions' — defined broadly to include employment, lending, housing, insurance, education, and healthcare. Legal departments need to assess two threshold questions: (1) Does our company develop or deploy high-risk AI systems? (2) Are we a developer, deployer, or user under the Act? The obligations differ significantly. Deployers — companies that use a high-risk AI system commercially — must implement risk management programs, conduct impact assessments, and provide consumer notice and adverse action procedures. Walk through the key elements briefly; we'll return to the practical response in slide 14.">
+          <div class="s-head">
+            <div class="s-section">State Regulation</div>
+            <div class="s-title">Colorado AI Act: <em>Why It Matters</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>SB 24-205</strong> — Colorado's AI Act, effective <span class="hl">February 1, 2026</span> — one of the first comprehensive U.S. state AI statutes</li>
+            <li><strong>Covers "high-risk AI systems"</strong> that make or substantially influence consequential decisions affecting individuals</li>
+            <li><strong>Consequential decisions include</strong> employment, lending, insurance, healthcare, education, and housing determinations</li>
+            <li><strong>Developers and deployers have distinct obligations</strong> — legal departments deploying AI may qualify as deployers</li>
+            <li><strong>Requires</strong> AI risk management programs, impact assessments, consumer disclosures, and adverse action notices</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">12 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             13 — WHAT LEGAL DEPARTMENTS NEED TO TRACK
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="The regulatory landscape is moving fast and is genuinely fragmented. Legal departments operating across multiple states need to track state AI legislation, not just Colorado's. Other states including California, Texas, and Illinois have active AI legislation in various stages. Federal developments — executive orders, agency guidance from the FTC, EEOC, and CFPB — also create compliance obligations that flow through legal. Bar guidance from the ABA and state bars is increasingly specific about AI use in practice. Courts are also beginning to address AI evidentiary and procedural questions through local rules. Recommend a monitoring cadence: at minimum, a quarterly regulatory scan with documented findings.">
+          <div class="s-head">
+            <div class="s-section">Regulatory Landscape</div>
+            <div class="s-title">What Legal Departments <em>Need to Track</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="two-col">
+            <div class="col-card t">
+              <h3>Regulatory Sources</h3>
+              <ul>
+                <li>Colorado AI Act (SB 24-205) — implementation and enforcement</li>
+                <li>Federal agency AI guidance: FTC, EEOC, CFPB, OCC</li>
+                <li>State AI legislation across all operating jurisdictions</li>
+                <li>Executive orders and federal AI policy developments</li>
+                <li>EU AI Act implications for multinational operations</li>
+              </ul>
+            </div>
+            <div class="col-card">
+              <h3>Professional &amp; Legal Sources</h3>
+              <ul>
+                <li>ABA Formal Opinions on attorney AI use (Op. 512, 2024)</li>
+                <li>Colorado Bar ethics guidance and formal opinions</li>
+                <li>Court local rules on AI-generated filings and disclosure</li>
+                <li>Emerging case law: AI evidence, sanctions, and liability</li>
+                <li>ACC and in-house counsel association AI guidance</li>
+              </ul>
+            </div>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">13 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             14 — PRACTICAL GOVERNANCE RESPONSE
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Bring the ethics and regulatory sections together with a practical action sequence. The first step — mapping AI tools against regulatory requirements — is often revealing: most organizations discover more AI use than expected, spread across functions that legal was not aware of. The developer vs. deployer vs. user distinction under the Colorado Act is a threshold question that determines what obligations apply to your company. Engaging IT security and compliance early prevents legal from being positioned as a blocker — it positions legal as an enabling partner in responsible deployment. Documentation of governance decisions creates the record you'll need if there's an incident, regulatory inquiry, or discovery request.">
+          <div class="s-head">
+            <div class="s-section">Action Framework</div>
+            <div class="s-title">Practical <em>Governance Response</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Map your AI tools</strong> — build a cross-functional inventory of AI in use; legal is rarely the only user</li>
+            <li><strong>Classify your role under the Colorado Act</strong> — developer, deployer, or user — each carries different obligations</li>
+            <li><strong>Conduct a risk assessment</strong> — identify which AI use cases qualify as high-risk under applicable law</li>
+            <li><strong>Engage compliance and IT security early</strong> — AI governance is cross-functional risk management, not a legal silo</li>
+            <li><strong>Document governance decisions</strong> — create the record you will need for regulatory inquiries and litigation holds</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">14 / 22</span>
+            <span class="s-badge teal">Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             15 — WHAT GOVERNANCE LOOKS LIKE IN PRACTICE
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Lindsey takes over for the operational governance section. Transition with: Camila has walked through the ethics and regulatory obligations — now let's talk about what it actually looks like to implement governance in a legal department. This slide grounds the abstract concept in concrete, real-world structures. A written AI use policy doesn't need to be 50 pages — it can start as a two-page document addressing approved tools, prohibited uses, verification requirements, and reporting obligations. An approved tool list with green/yellow/red risk classification is a practical starting point that most legal departments can implement in days, not months. The key is clear ownership: assign a responsible function before governance falls through the cracks.">
+          <div class="s-head">
+            <div class="s-section">Governance in Practice</div>
+            <div class="s-title">What Governance <em>Looks Like in Practice</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Written AI use policy for the legal department</strong> — approved tools, prohibited uses, verification requirements, reporting</li>
+            <li><strong>Approved tool list with risk classification</strong> — green (approved), yellow (conditional use), red (prohibited) by use case</li>
+            <li><strong>Defined review and approval workflows</strong> — who approves new AI tools before legal deploys or endorses them</li>
+            <li><strong>Clear ownership of AI governance</strong> — assign responsibility to GC, CLO, Legal Ops, or a cross-functional team with authority</li>
+            <li><strong>Start simple and iterate</strong> — a two-page interim policy enacted this quarter beats a perfect framework next year</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">15 / 22</span>
+            <span class="s-badge" style="background:rgba(148,163,184,0.12);border-color:rgba(148,163,184,0.4);color:#c4d4e4;">Lindsey Schultz</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             16 — ENTERPRISE AI GOVERNANCE FRAMEWORK
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Walk through the four layers of the enterprise AI governance framework using the visual. Start at the top — the policy layer — and work down. The policy layer establishes what is and isn't allowed; this is the foundation everything else builds on. Technical controls enforce the policy through access management, logging, and data classification — policy without technical enforcement isn't governance. Human oversight creates the checkpoints where attorney judgment is required before an AI output becomes a work product. The accountability layer ensures there are named owners, governance records, and a response process ready before something goes wrong. Emphasize the interdependency: a strong policy with no technical controls doesn't actually govern anything; technical controls with no accountability layer leave you unable to respond when an incident occurs.">
+          <div class="s-head">
+            <div class="s-section">Framework Design</div>
+            <div class="s-title">Enterprise AI <em>Governance Framework</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="layers">
+            <div class="layer ly1">
+              <div class="ly-label">Policy Layer</div>
+              <div class="ly-desc">Use cases, prohibited uses, approval process, acceptable use standards, scope of coverage</div>
+            </div>
+            <div class="layer ly2">
+              <div class="ly-label">Technical Controls</div>
+              <div class="ly-desc">Access management, activity logging, data classification, vendor security vetting, audit logging</div>
+            </div>
+            <div class="layer ly3">
+              <div class="ly-label">Human Oversight</div>
+              <div class="ly-desc">Attorney review checkpoints, sign-off requirements before use, escalation pathways for edge cases</div>
+            </div>
+            <div class="layer ly4">
+              <div class="ly-label">Accountability</div>
+              <div class="ly-desc">Named owners, governance decision records, incident response playbook, post-incident review loop</div>
+            </div>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">16 / 22</span>
+            <span class="s-badge" style="background:rgba(148,163,184,0.12);border-color:rgba(148,163,184,0.4);color:#c4d4e4;">Lindsey Schultz</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             17 — RISK CATEGORIES
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Walk through each risk quadrant. Data risk: focus on the vendor side — does your AI vendor use your inputs to train its model? If yes, confidential data you input could be in the training set accessible to other users. IP risk: the copyright status of AI-generated output is genuinely unsettled — the USPTO and courts have addressed AI authorship but the law continues to develop. In-house teams should not assume they own what AI produces without a specific contractual basis. Regulatory risk: the Colorado AI Act and federal agency guidance create compliance obligations specifically for organizations deploying AI in consequential decision contexts. Contractual risk: most standard vendor agreements were not drafted with AI in mind — indemnification gaps are common and increasingly discovered after incidents.">
+          <div class="s-head">
+            <div class="s-section">Risk Management</div>
+            <div class="s-title">Risk Categories: <em>Data, IP, Regulatory, Contractual</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="risk-grid">
+            <div class="rq">
+              <h4>Data Risk</h4>
+              <ul>
+                <li>Unauthorized disclosure via AI tool input</li>
+                <li>Vendor training data exposure</li>
+                <li>Cross-border data transfer obligations</li>
+                <li>Breach notification triggers</li>
+              </ul>
+            </div>
+            <div class="rq">
+              <h4>IP Risk</h4>
+              <ul>
+                <li>Copyright status of AI-generated output (unsettled)</li>
+                <li>Ownership of AI-assisted work product</li>
+                <li>Third-party IP embedded in training data</li>
+                <li>Trade secret exposure through AI input</li>
+              </ul>
+            </div>
+            <div class="rq">
+              <h4>Regulatory Risk</h4>
+              <ul>
+                <li>Colorado AI Act deployer obligations</li>
+                <li>Federal agency enforcement: FTC, EEOC, CFPB</li>
+                <li>High-risk AI system classification exposure</li>
+                <li>Impact assessment and audit requirements</li>
+              </ul>
+            </div>
+            <div class="rq">
+              <h4>Contractual Risk</h4>
+              <ul>
+                <li>Vendor indemnification gaps for AI errors</li>
+                <li>AI clauses absent from legacy agreements</li>
+                <li>Liability allocation for AI-generated output</li>
+                <li>Warranty and fitness representations</li>
+              </ul>
+            </div>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">17 / 22</span>
+            <span class="s-badge" style="background:rgba(148,163,184,0.12);border-color:rgba(148,163,184,0.4);color:#c4d4e4;">Lindsey Schultz</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             18 — BUILDING GOVERNANCE INTO WORKFLOWS
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Governance that lives only in a policy document doesn't govern anything — it has to be embedded in the workflows where AI is actually used. Walk through each bullet with a practical example. Disclosure requirements: if an attorney uses AI to draft a document, that should be noted in the work product record — this supports supervision obligations and creates defensible documentation. Updating employment agreements to address AI use and IP ownership is increasingly standard practice — particularly for roles where AI-assisted output is common. Vendor agreement templates need AI-specific provisions. Cross-functional alignment with IT, HR, and compliance prevents governance gaps where each function assumes another function has covered the issue.">
+          <div class="s-head">
+            <div class="s-section">Implementation</div>
+            <div class="s-title">Building Governance <em>Into Business Workflows</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Embed AI policy into existing approval workflows</strong> — deploying a new AI tool requires legal sign-off before go-live</li>
+            <li><strong>Require disclosure of AI use in work products</strong> — standard notation or metadata field for AI-assisted documents</li>
+            <li><strong>Align with IT, HR, and compliance</strong> — AI governance is enterprise-wide risk management, not a legal department island</li>
+            <li><strong>Update employment agreements</strong> — address employee AI use, ownership of AI-assisted output, and confidentiality obligations</li>
+            <li><strong>Update vendor agreement templates</strong> — add AI-specific confidentiality, training data prohibition, and liability provisions</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">18 / 22</span>
+            <span class="s-badge" style="background:rgba(148,163,184,0.12);border-color:rgba(148,163,184,0.4);color:#c4d4e4;">Lindsey Schultz</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             19 — TRAINING, MONITORING, INCIDENT RESPONSE
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Training is not optional — it is required by the competence obligations Camila discussed. But training alone is insufficient; monitoring is needed to ensure the policy is actually being followed in practice, not just on paper. Define what an 'AI incident' means for your organization before one occurs — is it an unauthorized disclosure? A hallucinated filing? A vendor breach? A discriminatory AI output in an HR context? Having defined incident types makes the response playbook actionable rather than reactive. The response playbook should include escalation paths, preservation obligations, regulatory notification triggers, and a post-incident review process. Governance is iterative — every incident should feed back into policy and training updates.">
+          <div class="s-head">
+            <div class="s-section">Operational Governance</div>
+            <div class="s-title">Training, Monitoring, and <em>Incident Response</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Baseline AI training is required</strong> for all legal staff using AI tools — competence obligations under Rule 1.1 demand it</li>
+            <li><strong>Monitor AI outputs for quality, accuracy, and policy compliance</strong> — not only at deployment, but on an ongoing basis</li>
+            <li><strong>Define what constitutes an AI-related incident</strong> before one occurs: unauthorized disclosure, hallucinated filing, vendor breach</li>
+            <li><strong>Build a response playbook now</strong> — escalation paths, preservation obligations, regulatory notification triggers, communications protocol</li>
+            <li><strong>Post-incident review must feed back into policy</strong> — AI governance is iterative; incidents are training data for your framework</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">19 / 22</span>
+            <span class="s-badge" style="background:rgba(148,163,184,0.12);border-color:rgba(148,163,184,0.4);color:#c4d4e4;">Lindsey Schultz</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             20 — MANAGING VENDOR AI RISK
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Lindsey and Camila share this slide. Lindsey covers vendor diligence; Camila covers the ethics angle. Most enterprise AI tools are provided by vendors under terms of service that were not designed with legal department use in mind. The critical question in vendor review: does the vendor use your data to train its models? If yes, every input containing confidential information is potentially a training data point — which creates confidentiality, privilege, and regulatory risks simultaneously. SOC 2 Type II certification is the baseline security requirement for enterprise tools. Data processing addenda (DPAs) should explicitly address training data use, data retention schedules, deletion obligations on termination, and breach notification timelines. Audit rights are increasingly non-negotiable for enterprise AI deployments. Re-evaluate vendor terms annually — AI vendors update their terms frequently, sometimes with inadequate notice.">
+          <div class="s-head">
+            <div class="s-section">Third-Party Risk</div>
+            <div class="s-title">Managing <em>Vendor AI Risk</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Review vendor AI terms</strong> — specifically: training data use, confidentiality of inputs, retention and deletion schedules</li>
+            <li><strong>Require SOC 2 Type II</strong> or equivalent security certification before approving enterprise AI tool deployment</li>
+            <li><strong>Negotiate data processing addenda</strong> that explicitly prohibit use of your data for model training or improvement</li>
+            <li><strong>Audit rights and breach notification obligations</strong> must appear in the contract — not only in the privacy policy</li>
+            <li><strong>Re-evaluate vendor terms annually</strong> — AI vendors update terms frequently, often with minimal notice to enterprise customers</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">20 / 22</span>
+            <span class="s-badge multi">Lindsey Schultz · Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             21 — MANAGING OUTSIDE COUNSEL AI RISK
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="Camila covers the ethics obligations angle; Lindsey covers the practical contracting elements. In-house counsel are in a unique position to set AI disclosure expectations for outside counsel — something most outside counsel firms are not yet being asked about systematically. Engagement letters should require affirmative disclosure of AI use on client matters, including which tools are used, what types of work are AI-assisted, and what review protocols apply. Billing implications are real: if AI generates a first draft in 10 minutes, is the client being billed for 3 hours of associate time? Address cost-shifting proactively in the engagement terms. Confidentiality: require outside counsel to confirm client data is never input into non-enterprise AI tools without explicit client authorization. This is an area where in-house counsel have significant leverage and should use it.">
+          <div class="s-head">
+            <div class="s-section">Outside Counsel Management</div>
+            <div class="s-title">Managing <em>Outside Counsel AI Risk</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <ul class="bullets">
+            <li><strong>Ask directly</strong> — inquire whether outside counsel uses AI on your matters, what tools, and in what capacity</li>
+            <li><strong>Update engagement letters</strong> to require disclosure of AI use and the review protocols applied before delivery</li>
+            <li><strong>Require documented review protocols</strong> — what verification standard does outside counsel apply to AI-assisted work product?</li>
+            <li><strong>Address billing and cost-shifting proactively</strong> — AI-generated drafts warrant scrutiny of hourly billing for equivalent tasks</li>
+            <li><strong>Require confidentiality confirmation</strong> — your data must not be input into non-enterprise AI tools without explicit authorization</li>
+          </ul>
+          <div class="s-meta">
+            <span class="s-num">21 / 22</span>
+            <span class="s-badge multi">Lindsey Schultz · Camila Tobón</span>
+          </div>
+        </div>
+
+
+        <!-- ═══════════════════════════════════════════════
+             22 — GOVERNANCE CHECKLIST / KEY TAKEAWAYS
+        ════════════════════════════════════════════════ -->
+        <div class="slide"
+          data-notes="All three speakers close the session together — each can take one or two checklist items and speak briefly to it. George: policy and tool classification. Camila: training and regulatory monitoring. Lindsey: vendor and outside counsel protocols. Close with a shared call to action: attendees should leave with at least one concrete step they commit to taking within 30 days. Suggested close line — all three speakers: 'AI governance is not about stopping AI use — it is about using AI in a way that protects your organization, your clients, and your professional license. You do not need a perfect framework today. You need to start somewhere, document your decisions, and build from there. Start now.' Leave 10–15 minutes for Q&A.">
+          <div class="s-head">
+            <div class="s-section">Key Takeaways</div>
+            <div class="s-title">Governance Checklist for <em>2026</em></div>
+            <div class="s-rule"></div>
+          </div>
+          <div class="checklist">
+            <div class="chk">
+              <div class="chk-box">✓</div>
+              <div class="chk-text"><strong>Adopt a written AI use policy</strong> for the legal department — start with two pages if needed; iterate from there</div>
+            </div>
+            <div class="chk">
+              <div class="chk-box">✓</div>
+              <div class="chk-text"><strong>Classify AI tools by risk level</strong> — build an approved tool list with green / yellow / red designations by use case</div>
+            </div>
+            <div class="chk">
+              <div class="chk-box">✓</div>
+              <div class="chk-text"><strong>Train your team</strong> on ethics obligations: competence, confidentiality, candor, verification, and the L.E.G.A.L. framework</div>
+            </div>
+            <div class="chk">
+              <div class="chk-box">✓</div>
+              <div class="chk-text"><strong>Monitor the Colorado AI Act and federal developments</strong> — assign a quarterly regulatory scan to a named function</div>
+            </div>
+            <div class="chk">
+              <div class="chk-box">✓</div>
+              <div class="chk-text"><strong>Build vendor and outside counsel AI protocols</strong> — update engagement letters and vendor agreement templates now</div>
+            </div>
+          </div>
+          <div class="s-meta">
+            <span class="s-num">22 / 22</span>
+            <span class="s-badge multi">All Speakers</span>
+          </div>
+        </div>
+
+
+      </div><!-- /slide-viewport -->
+    </div><!-- /slide-scaler -->
+  </div><!-- /slide-container -->
+
+  <!-- Notes panel -->
+  <div id="notes-wrap">
+    <div id="notes-panel">
+      <h4>Speaker Notes</h4>
+      <div id="notes-text"></div>
+    </div>
+  </div>
+
+  <!-- Controls -->
+  <div id="controls">
+    <button class="c-btn" id="btn-prev" onclick="nav(-1)" disabled>← Prev</button>
+    <div id="progress"><div id="progress-fill"></div></div>
+    <span id="counter">1 / 22</span>
+    <button class="c-btn" id="btn-next" onclick="nav(1)">Next →</button>
+    <button class="c-btn" id="btn-notes" onclick="toggleNotes()">Notes</button>
+    <button class="c-btn" onclick="toggleFS()">⛶ Fullscreen</button>
+  </div>
+</div>
+
+<div id="hint">← → Navigate &nbsp;·&nbsp; N Notes &nbsp;·&nbsp; F Fullscreen &nbsp;·&nbsp; Home / End</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let cur = 0, notesOpen = false;
+
+  function show(i) {
+    slides[cur].classList.remove('active');
+    cur = Math.max(0, Math.min(i, slides.length - 1));
+    slides[cur].classList.add('active');
+    document.getElementById('progress-fill').style.width = ((cur + 1) / slides.length * 100) + '%';
+    document.getElementById('counter').textContent = (cur + 1) + ' / ' + slides.length;
+    document.getElementById('btn-prev').disabled = cur === 0;
+    document.getElementById('btn-next').disabled = cur === slides.length - 1;
+    document.getElementById('notes-text').textContent = slides[cur].dataset.notes || '';
+  }
+
+  function nav(d) { show(cur + d); }
+
+  function toggleNotes() {
+    notesOpen = !notesOpen;
+    document.getElementById('notes-panel').classList.toggle('open', notesOpen);
+    document.getElementById('btn-notes').classList.toggle('on', notesOpen);
+  }
+
+  function toggleFS() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen && document.exitFullscreen();
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); nav(1); }
+    else if (['ArrowLeft','ArrowUp'].includes(e.key))   { e.preventDefault(); nav(-1); }
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End')  show(slides.length - 1);
+    else if (e.key.toLowerCase() === 'n') toggleNotes();
+    else if (e.key.toLowerCase() === 'f') toggleFS();
+  });
+
+  // Touch / swipe
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) nav(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
+  // Responsive scale
+  function scale() {
+    const W = 1200, H = 675;
+    const vw = window.innerWidth  * 0.97;
+    const vh = window.innerHeight - 120;
+    const s  = Math.min(vw / W, vh / H, 1.25);
+    const el = document.getElementById('slide-scaler');
+    el.style.transform = `scale(${s})`;
+    el.style.marginTop  = (H * s - H) / 2 + 'px';
+    el.style.marginBottom = (H * s - H) / 2 + 'px';
+  }
+  window.addEventListener('resize', scale);
+  scale();
+
+  // Init notes text for slide 0
+  document.getElementById('notes-text').textContent = slides[0].dataset.notes || '';
+</script>
+</body>
+</html>
