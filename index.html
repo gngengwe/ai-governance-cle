@@ -36,7 +36,7 @@
       width: 100vw; height: 100vh;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      gap: 14px;
+      gap: 6px;
     }
 
     #slide-container {
@@ -360,8 +360,8 @@
 
     /* ── Controls bar ── */
     #controls {
-      display: flex; align-items: center; gap: 12px;
-      padding: 0 12px 14px;
+      display: flex; align-items: center; gap: 10px;
+      padding: 0 12px 8px;
       width: 100%; max-width: calc(var(--slide-w) + 24px);
     }
     .c-btn {
@@ -1181,15 +1181,15 @@
     if (Math.abs(dx) > 50) nav(dx < 0 ? 1 : -1);
   }, { passive: true });
 
-  // Responsive scale
+  // Responsive scale — target ~80% of viewport
   function scale() {
     const W = 1200, H = 675;
-    const vw = window.innerWidth  * 0.97;
-    const vh = window.innerHeight - 120;
-    const s  = Math.min(vw / W, vh / H, 1.25);
+    const vw = window.innerWidth  * 0.98;
+    const vh = window.innerHeight * 0.82;
+    const s  = Math.min(vw / W, vh / H);
     const el = document.getElementById('slide-scaler');
     el.style.transform = `scale(${s})`;
-    el.style.marginTop  = (H * s - H) / 2 + 'px';
+    el.style.marginTop    = (H * s - H) / 2 + 'px';
     el.style.marginBottom = (H * s - H) / 2 + 'px';
   }
   window.addEventListener('resize', scale);
